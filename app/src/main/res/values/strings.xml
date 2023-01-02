@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AutoCart</string>
+
+    <string name="up">UP</string>
+    <string name="down">DOWN</string>
+    <string name="left">LEFT</string>
+    <string name="right">RIGHT</string>
+
+    <string name="error">ERROR</string>
+</resources>

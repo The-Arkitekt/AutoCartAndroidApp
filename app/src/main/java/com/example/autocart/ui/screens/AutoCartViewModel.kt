@@ -9,7 +9,9 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.autocart.AutoCartApplication
+import com.example.autocart.data.AppContainer
 import com.example.autocart.data.RobotMover
+import com.example.autocart.model.NetworkConfiguration
 
 /**
  * UI state for the Home screen
@@ -18,15 +20,22 @@ sealed interface AutoCartUIState {
     object Controller : AutoCartUIState
 }
 
-class AutoCartViewModel() : ViewModel() {
+class AutoCartViewModel(appContainer: AppContainer) : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
     var autoCartUIState: AutoCartUIState by mutableStateOf(AutoCartUIState.Controller)
         private set
+
+    private val appContainer: AppContainer = appContainer
 
     /**
      * Do nothing on init
      */
     init {}
+
+    fun configureNetwork(ssid: String, key: String) {
+        appContainer.networkConfiguration.ssid = ssid
+        appContainer.networkConfiguration.key = key
+    }
 
     /**
      * Factory for [ControllerViewModel] that takes [RobotMover] as a dependency
@@ -35,7 +44,7 @@ class AutoCartViewModel() : ViewModel() {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as AutoCartApplication)
-                AutoCartViewModel()
+                AutoCartViewModel(appContainer=application.container)
             }
         }
     }

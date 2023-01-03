@@ -1,6 +1,7 @@
 package com.example.autocart
 
 import android.app.Application
+import android.content.Context
 import com.example.autocart.data.AppContainer
 import com.example.autocart.data.DefaultAppContainer
 
@@ -9,6 +10,7 @@ class AutoCartApplication : Application() {
     lateinit var container: AppContainer
     override fun onCreate() {
         super.onCreate()
-        container = DefaultAppContainer()
+        val context: Context = applicationContext
+        container = DefaultAppContainer(context)
     }
 }

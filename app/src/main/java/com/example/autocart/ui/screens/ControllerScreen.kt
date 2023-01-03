@@ -4,9 +4,11 @@ import android.app.Activity
 import android.content.pm.ActivityInfo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,6 +34,8 @@ fun ControllerScreen(
         .height(100.dp)
         .width(128.dp)
 
+    val onPressColor = Color.Green
+
     Row(
         modifier = modifier
             .padding(horizontal = 64.dp, vertical = 24.dp)
@@ -47,8 +51,9 @@ fun ControllerScreen(
              */
             ActionOnPressAndReleaseButton(
                 modifier = horizontalButtonModifier,
-                actionOnPress = {viewModel.postMoveCommand(RobotMovement(magnitude="1", direction="left"))},
-                actionOnRelease = {viewModel.postMoveCommand(RobotMovement(magnitude="0", direction="left"))},
+                onPressColor = onPressColor,
+                actionOnPress = {viewModel.leftButtonMoveCommand(magnitude="1")},
+                actionOnRelease = {viewModel.leftButtonMoveCommand(magnitude="0")},
                 button_content = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_baseline_arrow_left_24),
@@ -61,8 +66,9 @@ fun ControllerScreen(
              */
             ActionOnPressAndReleaseButton(
                 modifier = horizontalButtonModifier,
-                actionOnPress = {viewModel.postMoveCommand(RobotMovement(magnitude="1", direction="right"))},
-                actionOnRelease = {viewModel.postMoveCommand(RobotMovement(magnitude="0", direction="right"))},
+                onPressColor = onPressColor,
+                actionOnPress = {viewModel.rightButtonMoveCommand(magnitude="1")},
+                actionOnRelease = {viewModel.rightButtonMoveCommand(magnitude="0")},
                 button_content = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_baseline_arrow_right_24),
@@ -82,8 +88,9 @@ fun ControllerScreen(
              */
             ActionOnPressAndReleaseButton(
                 modifier = verticalButtonModifier,
-                actionOnPress = {viewModel.postMoveCommand(RobotMovement(magnitude="1", direction="forward"))},
-                actionOnRelease = {viewModel.postMoveCommand(RobotMovement(magnitude="0", direction="forward"))},
+                onPressColor = onPressColor,
+                actionOnPress = {viewModel.upButtonMoveCommand(magnitude="1")},
+                actionOnRelease = {viewModel.upButtonMoveCommand(magnitude="0")},
                 button_content = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_baseline_arrow_drop_up_24),
@@ -96,8 +103,9 @@ fun ControllerScreen(
              */
             ActionOnPressAndReleaseButton(
                 modifier = verticalButtonModifier,
-                actionOnPress = {viewModel.postMoveCommand(RobotMovement(magnitude="1", direction="reverse"))},
-                actionOnRelease = {viewModel.postMoveCommand(RobotMovement(magnitude="0", direction="reverse"))},
+                onPressColor = onPressColor,
+                actionOnPress = {viewModel.downButtonMoveCommand(magnitude="1")},
+                actionOnRelease = {viewModel.downButtonMoveCommand(magnitude="0")},
                 button_content = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_baseline_arrow_drop_down_24),

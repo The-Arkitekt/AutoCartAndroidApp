@@ -13,10 +13,17 @@ import com.example.autocart.R
 
 @Composable
 fun HomeScreen(
-    autoCartUIState: AutoCartUIState,
+    autoCartViewModel: AutoCartViewModel,
     modifier: Modifier = Modifier
 ) {
-    when (autoCartUIState) {
+    /**
+     * TESTING: set network configuration
+     */
+    autoCartViewModel.configureNetwork(
+        ssid = "ESPWebServer",
+        key = ""
+    )
+    when (autoCartViewModel.autoCartUIState) {
         is AutoCartUIState.Controller -> {
             val controllerViewModel: ControllerViewModel =
                 viewModel(factory = ControllerViewModel.Factory)

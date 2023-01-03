@@ -1,6 +1,9 @@
 package com.example.autocart.data
 
+import android.content.Context
+import com.example.autocart.model.NetworkConfiguration
 import com.example.autocart.network.AutocartApiService
+import com.example.autocart.network.WifiConnection
 import retrofit2.Retrofit
 
 /**
@@ -8,6 +11,8 @@ import retrofit2.Retrofit
  */
 interface AppContainer {
     val robotMover: RobotMover
+    val connection: WifiConnection
+    var networkConfiguration: NetworkConfiguration
 }
 
 /**
@@ -15,7 +20,7 @@ interface AppContainer {
  *
  * Variables are initialized lazily and the same instance is shared across the whole app.
  */
-class DefaultAppContainer : AppContainer {
+class DefaultAppContainer(context: Context) : AppContainer {
     private val BASE_URL = "http://192.168.4.1:80/"
 
     /**
@@ -38,4 +43,17 @@ class DefaultAppContainer : AppContainer {
     override val robotMover: RobotMover by lazy {
         NetworkRobotMover(retrofitService)
     }
+
+    /**
+     * DI implementation for WifiConnection
+     */
+    override val connection: WifiConnection by lazy {
+        WifiConnection(context)
+    }
+
+    /**
+     * DI implementation for network configuration
+     */
+    override var networkConfiguration = NetworkConfiguration("null", "null")
+
 }

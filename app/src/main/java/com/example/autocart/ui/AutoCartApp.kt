@@ -26,7 +26,7 @@ fun AutoCartApp(modifier: Modifier = Modifier) {
             val autoCartViewModel: AutoCartViewModel =
                 viewModel(factory = AutoCartViewModel.Factory)
             HomeScreen(
-                autoCartUIState = autoCartViewModel.autoCartUIState,
+                autoCartViewModel = autoCartViewModel,
             )
         }
     }

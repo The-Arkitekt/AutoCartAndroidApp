@@ -1,8 +1,6 @@
-package com.example.autocart.Model
+package com.example.autocart.model
 
-/**
- * This data class defines a robot movement including the command
- */
 data class RobotMovement(
-    val contents: String
+    val magnitude: String,
+    val direction: String
 )

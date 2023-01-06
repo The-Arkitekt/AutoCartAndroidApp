@@ -25,84 +25,17 @@ import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
 
-sealed interface ButtonState {
-    data class Try(val response: Response<ResponseBody>) : ButtonState
-    object Success: ButtonState
-    object Error : ButtonState
-    object NotPressed : ButtonState
-}
-
-class ButtonModel (robotMover: RobotMover) {
-    private val thisRobotMover: RobotMover = robotMover
-    var state: ButtonState by mutableStateOf(ButtonState.NotPressed)
-
-    suspend fun moveCommand(robotMovement: RobotMovement) {
-        this.state = try {
-            ButtonState.Try(thisRobotMover.postMoveCommand(robotMovement))
-        } catch (e: IOException) {
-            ButtonState.Error
-        } catch (e: HttpException) {
-            ButtonState.Error
-        }
-        this.state = ButtonState.Success
-    }
-}
-
-class ControllerViewModel(
-    private val connection: WifiConnection,
-    private val networkConfiguration: NetworkConfiguration,
-    private val robotMover: RobotMover) : ViewModel() {
-    /**
-     * Create Button objects
-     */
-    private val leftButton  = ButtonModel(robotMover)
-    private val rightButton = ButtonModel(robotMover)
-    private val upButton    = ButtonModel(robotMover)
-    private val downButton  = ButtonModel(robotMover)
-
+class ControllerViewModel(private val robotMover: RobotMover) : ViewModel() {
     /**
      * Connect to IOT network on Init()
      */
-    init {
-        viewModelScope.launch() {
-            connection.connectToNetwork(networkConfiguration)
-        }
-    }
-    /**
-     * Getters and Setters
-     */
-    fun connectionStatus() : Boolean{
-        return connection.connected
-    }
+    init {}
 
-    /**
-     * wrappers for moveCommands of ButtonModel objects in ViewModelScope
-     */
-    fun leftButtonMoveCommand(magnitude: String) {
-        val robotMovement: RobotMovement = RobotMovement(magnitude, direction="0")
+    fun postMoveCommand(robotMovement: RobotMovement) {
         viewModelScope.launch {
-            leftButton.moveCommand(robotMovement)
+            robotMover.postMoveCommand(robotMovement)
         }
     }
-    fun rightButtonMoveCommand(magnitude: String) {
-        val robotMovement: RobotMovement = RobotMovement(magnitude, direction="2")
-        viewModelScope.launch {
-            rightButton.moveCommand(robotMovement)
-        }
-    }
-    fun upButtonMoveCommand(magnitude: String) {
-        val robotMovement: RobotMovement = RobotMovement(magnitude, direction="1")
-        viewModelScope.launch {
-            upButton.moveCommand(robotMovement)
-        }
-    }
-    fun downButtonMoveCommand(magnitude: String) {
-        val robotMovement: RobotMovement = RobotMovement(magnitude, direction="3")
-        viewModelScope.launch {
-            downButton.moveCommand(robotMovement)
-        }
-    }
-
     /**
      * Factory for [ControllerViewModel] that takes [RobotMover] as a dependency
      */
@@ -111,13 +44,7 @@ class ControllerViewModel(
             initializer {
                 val application = (this[APPLICATION_KEY] as AutoCartApplication)
                 val robotMover = application.container.robotMover
-                val connection = application.container.connection
-                val networkConfiguration = application.container.networkConfiguration
-                ControllerViewModel(
-                    connection = connection,
-                    networkConfiguration = networkConfiguration,
-                    robotMover = robotMover
-                )
+                ControllerViewModel(robotMover = robotMover)
             }
         }
     }

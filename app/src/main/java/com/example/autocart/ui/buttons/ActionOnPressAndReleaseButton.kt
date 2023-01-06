@@ -9,7 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.autocart.ui.screens.ButtonState
 
 @Composable
 fun ActionOnPressAndReleaseButton(modifier: Modifier = Modifier,

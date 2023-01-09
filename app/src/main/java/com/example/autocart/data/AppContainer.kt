@@ -12,7 +12,7 @@ import retrofit2.Retrofit
 interface AppContainer {
     val robotMover: RobotMover
     val connection: WifiConnection
-    var networkConfiguration: NetworkConfiguration
+    val validDevices: Map<String, NetworkConfiguration>
 }
 
 /**
@@ -50,10 +50,11 @@ class DefaultAppContainer(context: Context) : AppContainer {
     override val connection: WifiConnection by lazy {
         WifiConnection(context)
     }
-
     /**
-     * DI implementation for network configuration
+     * DI implementation of validDevices
      */
-    override var networkConfiguration = NetworkConfiguration("null", "null")
+    override val validDevices = mapOf(
+        "Movement Controller" to NetworkConfiguration("AutoCartMovementController", "")
+    )
 
 }

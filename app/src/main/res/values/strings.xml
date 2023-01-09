@@ -6,21 +6,26 @@
     <string name="left">LEFT</string>
     <string name="right">RIGHT</string>
 
-    <string name="error">ERROR</string>
+    <string name="error">OOPS! Something very bad happened :(</string>
+    <string name="back">Back</string>
+    <string name="try_again">Try Again</string>
     <string name="standing_by">Standing By</string>
     <string name="enable_wifi">Please Enable Wifi</string>
     <string name="_continue">Continue</string>
 
-    <string name="sign_in_request">Please Sign In To AutoCart Network</string>
-    <string name="ssid">SSID</string>
-    <string name="key">Password</string>
-    <string name="sign_in">Sign In</string>
+    <string name="device_select_request">Select device from list below</string>
+    <string name="enter_password">Enter password for: </string>
+    <string name="password">Password</string>
+    <string name="connect">Connect</string>
+    <string name="failed_to_connect">Failed to connect to device: "</string>
+    <string name="movement_controller">Movement Controller</string>
 
     <string name="connection_status">Connection Status:</string>
     <string name="not_connected">Not Connected</string>
     <string name="connecting">Connecting</string>
     <string name="connected_to">Connected To</string>
-    <string name="connect">Connect To a Device</string>
+    <string name="connect_to_device">Connect To Device</string>
+
     <string name="controller">Controller</string>
     <string name="home">Home</string>
 

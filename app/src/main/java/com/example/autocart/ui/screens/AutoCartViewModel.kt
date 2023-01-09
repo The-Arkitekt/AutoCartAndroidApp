@@ -38,34 +38,38 @@ sealed interface AutoCartConnectionState {
  * UI state for the Home screen
  */
 sealed interface AutoCartUIState {
-    object Standby     : AutoCartUIState
-    object EnableWifi  : AutoCartUIState
-    object SignOn      : AutoCartUIState
-    object Menu        : AutoCartUIState
-    object Controller  : AutoCartUIState
+    data class EnableWifi(val retry: () -> Unit) : AutoCartUIState
+    data class ConnectToDevice(
+        val deviceName: String,
+        val networkConfiguration: NetworkConfiguration
+    ) : AutoCartUIState
+    data class Error(val retry: () -> Unit) : AutoCartUIState
+    data class FailedToConnect(val device: String) : AutoCartUIState
+    object Standby         : AutoCartUIState
+    object DeviceSelection : AutoCartUIState
+    object Menu            : AutoCartUIState
+    object Controller      : AutoCartUIState
 }
 
 class AutoCartViewModel(
-    val wifiConnection: WifiConnection,
-    private val networkConfiguration: NetworkConfiguration
+    private val wifiConnection: WifiConnection,
+    private val validDevices: Map<String, NetworkConfiguration>
 ) : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
     var autoCartUIState: AutoCartUIState by mutableStateOf(AutoCartUIState.Menu)
         private set
 
-    private val connectionState = if(wifiConnection.connected()) {
-        AutoCartConnectionState.Connected
-    } else {
-        AutoCartConnectionState.NotConnected
-    }
-    var liveConnectionStatus: AutoCartConnectionState by mutableStateOf(connectionState)
-    var liveSsid: String by mutableStateOf(wifiConnection.configuration().ssid)
+    var liveConnectionStatus: AutoCartConnectionState by mutableStateOf(AutoCartConnectionState.NotConnected)
+    var liveDevice: String by mutableStateOf("")
 
     fun updateLiveConnectionStatus(state: AutoCartConnectionState) {
         liveConnectionStatus = state
+        if (state == AutoCartConnectionState.NotConnected) {
+            updateLiveDevice("")
+        }
     }
-    fun updateLiveSsid(ssid: String) {
-        liveSsid = ssid
+    fun updateLiveDevice(deviceName: String) {
+        liveDevice = deviceName
     }
 
     /**
@@ -82,9 +86,29 @@ class AutoCartViewModel(
             autoCartUIState = AutoCartUIState.Controller
         }
     }
-    fun startSignOn() {
+    fun startDeviceSelection() {
         viewModelScope.launch {
-            checkWifiAdapter()
+            autoCartUIState = if (wifiConnection.isWifiAdapterEnabled()) {
+                AutoCartUIState.DeviceSelection
+            }
+            else {
+                AutoCartUIState.EnableWifi(retry = {startDeviceSelection()})
+            }
+        }
+    }
+    fun startConnectScreen(deviceName: String) {
+        viewModelScope.launch {
+            autoCartUIState = if (deviceName in validDevices) {
+                AutoCartUIState.ConnectToDevice(deviceName, validDevices[deviceName] as NetworkConfiguration)
+            }
+            else {
+                AutoCartUIState.Error(retry = {startDeviceSelection()})
+            }
+        }
+    }
+    fun startFailedToConnectScreen(device: String) {
+        viewModelScope.launch {
+            autoCartUIState = AutoCartUIState.FailedToConnect(device)
         }
     }
     fun startHome() {
@@ -93,31 +117,12 @@ class AutoCartViewModel(
         }
     }
     /**
-     * Check if Wifi adapter is on
-     */
-    private fun checkWifiAdapter() {
-        viewModelScope.launch {
-            autoCartUIState = if (wifiConnection.isWifiAdapterEnabled()) {
-                AutoCartUIState.SignOn
-            } else {
-                AutoCartUIState.EnableWifi
-            }
-        }
-    }
-    /**
-     * Configure AP to connect to
-     */
-    fun configureNetwork(ssid: String, key: String) {
-        networkConfiguration.ssid = ssid
-        networkConfiguration.key = key
-    }
-    /**
      * Connect to configured network
      */
-    fun connectToNetwork() {
+    fun connectToNetwork(deviceName: String, configuration: NetworkConfiguration) {
         val thisViewModel: AutoCartViewModel = this
         viewModelScope.launch {
-            wifiConnection.connectToNetwork(networkConfiguration, thisViewModel)
+            wifiConnection.connectToNetwork(deviceName, configuration, thisViewModel)
             autoCartUIState = AutoCartUIState.Menu
         }
     }
@@ -129,10 +134,10 @@ class AutoCartViewModel(
             initializer {
                 val application = (this[APPLICATION_KEY] as AutoCartApplication)
                 val wifiConnection = application.container.connection
-                val networkConfiguration = application.container.networkConfiguration
+                val validDevices = application.container.validDevices
                 AutoCartViewModel(
                     wifiConnection       = wifiConnection,
-                    networkConfiguration = networkConfiguration
+                    validDevices         = validDevices
                 )
             }
         }

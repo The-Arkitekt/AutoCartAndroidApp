@@ -35,21 +35,37 @@ fun HomeScreen(
         is AutoCartUIState.Standby -> {
             StandbyScreen(modifier)
         }
-        is AutoCartUIState.EnableWifi -> {
-            EnableWifiScreen(modifier) {
-                viewModel.startSignOn()
-            }
-        }
-        is AutoCartUIState.SignOn -> {
-            SignOnScreen(
-                modifier,
-                viewModel = viewModel
-            )
-        }
         is AutoCartUIState.Menu -> {
             MenuScreen(
                 modifier,
                 viewModel,
+            )
+        }
+        is AutoCartUIState.EnableWifi -> {
+            EnableWifiScreen(
+                modifier,
+                (viewModel.autoCartUIState as AutoCartUIState.EnableWifi).retry
+            )
+        }
+        is AutoCartUIState.DeviceSelection -> {
+            DeviceSelectionScreen(
+                modifier,
+                viewModel = viewModel
+            )
+        }
+        is AutoCartUIState.ConnectToDevice -> {
+            ConnectScreen(
+                modifier,
+                (viewModel.autoCartUIState as AutoCartUIState.ConnectToDevice).networkConfiguration,
+                (viewModel.autoCartUIState as AutoCartUIState.ConnectToDevice).deviceName,
+                viewModel
+            )
+        }
+        is AutoCartUIState.FailedToConnect -> {
+            FailedToConnectScreen(
+                modifier,
+                viewModel,
+                (viewModel.autoCartUIState as AutoCartUIState.FailedToConnect).device
             )
         }
         is AutoCartUIState.Controller -> {
@@ -57,6 +73,12 @@ fun HomeScreen(
                 modifier,
                 viewModel(factory = ControllerViewModel.Factory),
                 viewModel
+            )
+        }
+        is AutoCartUIState.Error -> {
+            ErrorScreen(
+                modifier,
+                (viewModel.autoCartUIState as AutoCartUIState.Error).retry
             )
         }
     }
@@ -75,15 +97,16 @@ fun MenuScreen(
      * Start of UI design
      */
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(
-            onClick = {viewModel.startSignOn()},
+            onClick = {viewModel.startDeviceSelection()},
             modifier = buttonModifier
         ) {
-            Text(stringResource(R.string.connect))
+            Text(stringResource(R.string.connect_to_device))
         }
         Spacer(Modifier.height(32.dp))
         Button(
@@ -94,24 +117,6 @@ fun MenuScreen(
         }
     }
 }
-
-/**
- * TESTING
-
-@Composable
-fun MyComposeView(viewModel: AutoCartViewModel) {
-    Column {
-
-        viewModel.configureNetwork(ssid="testing", "passing")
-
-        Button(onClick = { viewModel.connectToNetwork()}) {
-            Text(text = "Click Me!")
-        }
-
-        Text(text = stringResource(viewModel.liveConnectionStatus.stringId))
-    }
-}
-*/
 
 @Composable
 fun StandbyScreen(modifier: Modifier = Modifier) {
@@ -137,6 +142,20 @@ fun EnableWifiScreen(modifier: Modifier = Modifier, retry: () -> Unit) {
         Text(stringResource(R.string.enable_wifi))
         Button(onClick = retry) {
             Text(stringResource(R.string._continue))
+        }
+    }
+}
+
+@Composable
+fun ErrorScreen(modifier: Modifier = Modifier, retry: () -> Unit) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(stringResource(R.string.error))
+        Button(onClick = retry) {
+            Text(stringResource(R.string.back))
         }
     }
 }

@@ -17,40 +17,14 @@ import com.example.autocart.ui.screens.AutoCartConnectionState
 import com.example.autocart.ui.screens.AutoCartViewModel
 
 class WifiConnection(context: Context) {
-    private lateinit var _configuration: NetworkConfiguration
     private var _connected: Boolean = false
     private val context: Context = context
 
-    init {
-        if (isWifiAdapterEnabled()) {
-            val connectivityManager: ConnectivityManager =
-                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-            val networkCapabilities: NetworkCapabilities =
-                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-                        as NetworkCapabilities
-
-            val wifiInfo: WifiInfo = networkCapabilities.transportInfo as WifiInfo
-            if (wifiInfo != null) {
-                _connected = true
-                _configuration = NetworkConfiguration(wifiInfo.ssid, "")
-            }
-            else {
-                _connected = false
-                _configuration = NetworkConfiguration("", "")
-            }
-        } else {
-            _connected = false
-            _configuration = NetworkConfiguration("", "")
-        }
-    }
+    init {}
 
     /**
      * Getters and Setters
      */
-    fun configuration() : NetworkConfiguration {
-        return _configuration
-    }
     fun connected() : Boolean {
         return _connected
     }
@@ -62,7 +36,7 @@ class WifiConnection(context: Context) {
         return wifiManager.isWifiEnabled
     }
 
-    fun connectToNetwork(networkConfiguration: NetworkConfiguration, viewModel: AutoCartViewModel) {
+    fun connectToNetwork(deviceName: String, networkConfiguration: NetworkConfiguration, viewModel: AutoCartViewModel) {
         /**
          * Configure desired network connection
          */
@@ -73,8 +47,8 @@ class WifiConnection(context: Context) {
         /**
          * Update UI
          */
-        viewModel.updateLiveSsid("")
         viewModel.updateLiveConnectionStatus(AutoCartConnectionState.Connecting)
+        viewModel.updateLiveDevice(networkConfiguration.ssid)
 
         val wifiNetworkSpecifier: WifiNetworkSpecifier = WifiNetworkSpecifier.Builder()
             .setSsid(networkConfiguration.ssid)
@@ -97,16 +71,13 @@ class WifiConnection(context: Context) {
                 _connected = connectivityManager.bindProcessToNetwork(network)
                 if (_connected) {
                     viewModel.updateLiveConnectionStatus(AutoCartConnectionState.Connected)
-                    _configuration = networkConfiguration
-                    viewModel.updateLiveSsid(_configuration.ssid)
                 }
             }
             override fun onUnavailable() {
                 super.onUnavailable()
                 _connected = false
                 viewModel.updateLiveConnectionStatus(AutoCartConnectionState.NotConnected)
-                _configuration = networkConfiguration
-                viewModel.updateLiveSsid("")
+                viewModel.startFailedToConnectScreen(deviceName)
             }
 
         }

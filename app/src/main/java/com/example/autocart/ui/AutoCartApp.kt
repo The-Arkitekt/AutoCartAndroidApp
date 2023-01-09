@@ -30,7 +30,8 @@ fun AutoCartApp(modifier: Modifier = Modifier) {
                 Text(
                     stringResource(R.string.app_name) + " : "
                             + stringResource(autoCartViewModel.liveConnectionStatus.stringId) + " "
-                            + autoCartViewModel.liveSsid
+                            + autoCartViewModel.liveDevice,
+                    textAlign = TextAlign.Center
                 )
             })
         }
